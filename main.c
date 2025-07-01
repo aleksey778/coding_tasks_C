@@ -53,7 +53,6 @@ int main(void)
 	char nick_name[10];
 	int count_true = 0;
 	int count_balls = 0;
-	int q_pos = 0;
 	int r1, r2;
 	while (menu_choice != 4) {		
 		//создание статистики(если не создана)
@@ -66,20 +65,30 @@ int main(void)
 		
 		//шифрование, обновление статистики
 		if (flag_update == true) {
-			encryption_data(&count_true, &count_balls, &q_pos,
+			encryption_data(&count_true, &count_balls,
 							r1, r2);
 			if (update_stats(nick_name, count_true, count_balls,
-							q_pos, r1, r2) == 1)
+							r1, r2) == 1)
 				return 1;
 		}
 		
 		//чтение и расшифровка данных из базы
 		if (read_data_for_stats(nick_name, &count_true,
-			&count_balls, &q_pos, &r1, &r2) == 1)
+			&count_balls, &r1, &r2) == 1)
 				return 1;
-		decryption_data(&count_true, &count_balls, &q_pos,
+		decryption_data(&count_true, &count_balls,
 							r1, r2);
-		
+							
+							
+		//создание базы позиции вопроса(если не создана)
+		if (pos_base_was_created() == false)
+			if (create_pos_file() == 1)
+				return 1;
+		//получение позиции
+		int q_pos = get_pos();
+		if (q_pos == 1)
+			return 1;
+		q_pos += 2025; //расшифровка
 		
 		//Выбор действий
 		printf("Введите пункт меню:\
@@ -107,8 +116,10 @@ int main(void)
 			}
 				
 			//решение задач
-			if (start_work(&count_true, &count_balls, &q_pos) == 1)
+			if (start_work(&count_true, &count_balls) == 1) {
+				printf("error in start_work\n");
 				return 1;
+			}
 			flag_update = true;
 		}
 		
@@ -135,6 +146,10 @@ int main(void)
 		else if (menu_choice == 3) {
 			if (delete_stats() == 1)
 				return 1;
+			if (remove("position_base.txt") != 0) {
+				puts("Не удалось удалить");
+				return 1;
+			}
 			flag_update = false;
 			count_true = 0;
 			count_balls = 0;

@@ -3,26 +3,24 @@
 #include <stdbool.h>
 
 
-void encryption_data(int *count_true, int *count_balls, int *q_pos,
+void encryption_data(int *count_true, int *count_balls,
 int r1, int r2)
 {
 	*count_true = *count_true - (r1+r2);
 	*count_balls = *count_balls - r2*5 + r1 + 10;
-	*q_pos = *q_pos - r1*r2 + 70;
 }
 
 
-void decryption_data(int *count_true, int *count_balls, int *q_pos,
+void decryption_data(int *count_true, int *count_balls,
 int r1, int r2)
 {
 		*count_true = *count_true + (r1+r2);
 		*count_balls = *count_balls + r2*5 - r1 - 10;
-		*q_pos = *q_pos + r1*r2 - 70;
 }
 
 
 int read_data_for_stats(const char *nick_name, int *count_true, int *count_balls,
-int *q_pos, int *r1, int *r2)
+int *r1, int *r2)
 {
 	FILE *file_read = fopen("stats_base.txt", "r");
 	if (file_read == NULL) {
@@ -30,8 +28,8 @@ int *q_pos, int *r1, int *r2)
 			return 1;
 	}
 	
-	if (fscanf(file_read, "%s %d %d %d %d %d",
-				nick_name, count_true, count_balls, q_pos, r1, r2) != 6)
+	if (fscanf(file_read, "%s %d %d %d %d",
+				nick_name, count_true, count_balls, r1, r2) != 5)
 		return 1;
 		
 	
@@ -53,16 +51,16 @@ bool stats_was_created(void)
 
 
 int update_stats(const char *nick_name, int count_true, int count_balls,
-int q_pos, int r1, int r2)
+int r1, int r2)
 {
 	FILE *file_write = fopen("stats_base.txt", "w");
 	if (file_write == NULL)
 		return 1;
 	
-	fprintf(file_write, "%s %d %d %d %d %d",
+	fprintf(file_write, "%s %d %d %d %d",
 	nick_name,
 	count_true, count_balls,
-	q_pos, r1, r2);
+	r1, r2);
 	
 	fclose(file_write);
 	return 0;

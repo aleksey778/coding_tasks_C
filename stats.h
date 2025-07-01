@@ -4,17 +4,17 @@
 
 
 
-void encryption_data(int *count_true, int *count_balls, int *q_pos,
+void encryption_data(int *count_true, int *count_balls,
 int r1, int r2);
 
-void decryption_data(int *count_true, int *count_balls, int *q_pos,
+void decryption_data(int *count_true, int *count_balls,
 int r1, int r2);
 
 int read_data_for_stats(const char *nick_name, int *count_true, int *count_balls,
-int *q_pos, int *r1, int *r2);
+int *r1, int *r2);
 
 int update_stats(const char *nick_name, int count_true, int count_balls,
-int q_pos, int r1, int r2);
+int r1, int r2);
 
 bool stats_was_created(void);
 

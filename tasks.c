@@ -14,6 +14,65 @@ const char *insert_terms[] = {"3", "10", "8",
 	"okey", "value", "win"};
 
 
+int create_pos_file(void)
+{
+	FILE *create_file = fopen("position_base.txt", "w");
+	if (create_file == NULL)
+		return 1;
+		
+	fprintf(create_file, "%d", -2025);//-2025 = 0 - шифров.значения
+	fclose(create_file);
+	
+	return 0;
+}
+
+
+bool pos_base_was_created(void)
+{
+	FILE *read_file = fopen("position_base.txt", "r");
+	
+	if (read_file == NULL)
+		return false;
+	
+	fclose(read_file);
+	return true;
+}
+
+
+int get_pos(void)
+{
+	FILE *read_file = fopen("position_base.txt", "r");
+	if (read_file == NULL) {
+		printf("Error in get_pos\n");
+		return 1;
+	}
+	
+	int pos;
+	if (fscanf(read_file, "%d", &pos) != 1)
+		return 1;
+	fclose(read_file);
+	
+	return pos;
+}
+
+
+int plus_pos_to_base(void)
+{
+	int pos = get_pos();
+	if (pos == 1)
+		return 1;
+	
+	FILE *write_file = fopen("position_base.txt", "w");
+	if (write_file == NULL)
+		return 1;
+	
+	fprintf(write_file, "%d", pos+1);
+	fclose(write_file);
+	
+	return 0;
+}
+
+
 int get_q_all(void)
 {
 	return sizeof(answers) / sizeof(*answers);
@@ -82,7 +141,6 @@ void gen_question(char *question, int *true_answer, int *balls, int q_pos)
 	for (int i = 0; i < number_variant_answers; i++) {
 		//формирование правильного варианта
 		if (i == *true_answer) {
-			printf("%d\n", (*true_answer)+1);
 			char variant_answer_text[15];
 			sprintf(variant_answer_text, "(%d) %s\n",
 			i+1, answers[q_pos]);
@@ -114,8 +172,8 @@ void gen_question(char *question, int *true_answer, int *balls, int q_pos)
 }
 
 
-int start_work(int *count_true, int *count_balls, int *q_pos)
-{
+int start_work(int *count_true, int *count_balls)
+{	
 	bool truth_answer_text = false;
 	bool go_to_task_menu = false;
 	while (1) {
@@ -148,7 +206,13 @@ int start_work(int *count_true, int *count_balls, int *q_pos)
 		char question[300];
 		int true_answer;
 		int balls;
-		gen_question(question, &true_answer, &balls, *q_pos);
+		
+		//получение позиции
+		int q_pos = get_pos();
+		
+		//генерация вопроса
+		gen_question(question, &true_answer, &balls,
+		q_pos+2025);//q_pos-2025  - расшифровка
 		printf("%s", question);
 		//ввод ответа
 		scanf("%d", &my_answer);
@@ -161,10 +225,18 @@ int start_work(int *count_true, int *count_balls, int *q_pos)
 			truth_answer_text = true;
 		}
 		else {
-			truth_answer_text = false;
+			truth_answer_text = false;			
 		}
 		go_to_task_menu = true;
-		(*q_pos)++;
+		
+		//создание базы позиции вопроса(если не создана)
+		if (pos_base_was_created() == false)
+			if (create_pos_file() == 1)
+				return 1;
+		
+		//сдвиг позиции
+		if (plus_pos_to_base() == 1)
+			return 1;
 	}
 	
 	return 0;
